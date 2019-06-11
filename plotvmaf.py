@@ -93,6 +93,10 @@ vmaf_ax.set_xticks(x_tick)
 psnr_ax.set_xticks(x_tick)
 ssim_ax.set_xticks(x_tick)
 
+vmaf_ax.set_ylim(ymin=60, ymax=100)
+psnr_ax.set_ylim(ymin=35, ymax=60)
+ssim_ax.set_ylim(ymin=0.9, ymax=1)
+
 vmaf_ax.grid(True)
 psnr_ax.grid(True)
 ssim_ax.grid(True)
