@@ -71,15 +71,27 @@ ssim_y = ssim_array
 
 fig, (vmaf_ax, psnr_ax, ssim_ax) = matplot.subplots(3, 1)
 fig.canvas.set_window_title(args.input)
-# fig.set_size_inches(frame_count, 10.5)
+
+fig_size_x_inches = 40
+fig_size_y_inches = 20
+fig_dpi = 100
+
+fig.set_size_inches(fig_size_x_inches, fig_size_y_inches)
 
 vmaf_ax.set_title("VMAF")
 psnr_ax.set_title("PSNR")
 ssim_ax.set_title("SSIM")
 
-# vmaf_ax.set_xticks(x)
-# psnr_ax.set_xticks(x)
-# ssim_ax.set_xticks(x)
+#x_tick step calculation
+pixels_all = fig_size_x_inches * fig_dpi
+pixel_step = 100
+
+frame_number = pixels_all / pixel_step
+x_tick = numpy.linspace(0, frame_count, frame_number, dtype = int)
+
+vmaf_ax.set_xticks(x_tick)
+psnr_ax.set_xticks(x_tick)
+ssim_ax.set_xticks(x_tick)
 
 vmaf_ax.grid(True)
 psnr_ax.grid(True)
@@ -91,6 +103,6 @@ ssim_ax.plot(x, ssim_y)
 
 # render graph to file (if requested) or screen
 if args.output:
-    matplot.savefig(args.output, format=args.format, dpi=100)
+    matplot.savefig(args.output, format=args.format, dpi=fig_dpi)
 else:
     matplot.show()                
