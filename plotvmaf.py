@@ -71,7 +71,7 @@ ssim_y = ssim_array
 
 fig, (vmaf_ax, psnr_ax, ssim_ax) = matplot.subplots(3, 1)
 fig.canvas.set_window_title(args.input)
-fig.set_size_inches(frame_count, 10.5)
+# fig.set_size_inches(frame_count, 10.5)
 
 vmaf_ax.set_title("VMAF")
 psnr_ax.set_title("PSNR")
