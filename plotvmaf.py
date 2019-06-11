@@ -77,9 +77,9 @@ vmaf_ax.set_title("VMAF")
 psnr_ax.set_title("PSNR")
 ssim_ax.set_title("SSIM")
 
-vmaf_ax.set_xticks(x)
-psnr_ax.set_xticks(x)
-ssim_ax.set_xticks(x)
+# vmaf_ax.set_xticks(x)
+# psnr_ax.set_xticks(x)
+# ssim_ax.set_xticks(x)
 
 vmaf_ax.grid(True)
 psnr_ax.grid(True)
