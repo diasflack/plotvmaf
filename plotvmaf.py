@@ -28,6 +28,7 @@ parser = argparse.ArgumentParser(
     description="Graph bitrate for vmaf/psnr/ssim")
 parser.add_argument('input', help="input file/stream", metavar="INPUT")
 
+parser.add_argument('-c', '--compare', help="compare with")
 parser.add_argument('-o', '--output', help="output file")
 parser.add_argument('-f', '--format', help="output file format",
     choices=format_list)
@@ -43,6 +44,7 @@ vmaf_data = []
 psnr_data = []
 ssim_data = []
 frame_count = 0
+compareMode = False
 
 with open(args.input) as json_file:
     data = json.load(json_file)
@@ -50,6 +52,15 @@ with open(args.input) as json_file:
         vmaf_data.append(frame['metrics']['vmaf'])
         psnr_data.append(frame['metrics']['psnr'])
         ssim_data.append(frame['metrics']['ssim'])
+
+if args.compare:
+    compareMode = True
+    with open(args.compare) as json_file:
+        data = json.load(json_file)
+        for i, frame in enumerate(data['frames']):
+            vmaf_data[i] = vmaf_data[i] - frame['metrics']['vmaf']
+            psnr_data[i] = psnr_data[i] - frame['metrics']['psnr']
+            ssim_data[i] = ssim_data[i] - frame['metrics']['ssim']
 
 # render charts in order of expected decreasing size
 vmaf_array = numpy.array(vmaf_data)
@@ -88,9 +99,10 @@ vmaf_ax.set_xticks(x_tick)
 psnr_ax.set_xticks(x_tick)
 ssim_ax.set_xticks(x_tick)
 
-vmaf_ax.set_ylim(ymin=60, ymax=100)
-psnr_ax.set_ylim(ymin=35, ymax=60)
-ssim_ax.set_ylim(ymin=0.9, ymax=1)
+if not compareMode:
+    vmaf_ax.set_ylim(ymin=60, ymax=100)
+    psnr_ax.set_ylim(ymin=35, ymax=60)
+    ssim_ax.set_ylim(ymin=0.9, ymax=1)
 
 vmaf_ax.grid(True)
 psnr_ax.grid(True)
