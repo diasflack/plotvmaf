@@ -51,7 +51,10 @@ with open(args.input) as json_file:
     for frame in data['frames']:
         vmaf_data.append(frame['metrics']['vmaf'])
         psnr_data.append(frame['metrics']['psnr'])
-        ssim_data.append(frame['metrics']['ssim'])
+        if 'ssim' in frame['metrics']:
+            ssim_data.append(frame['metrics']['ssim'])
+        else:
+            ssim_data.append(frame['metrics']['ms_ssim'])    
 
 if args.compare:
     compareMode = True
@@ -60,7 +63,10 @@ if args.compare:
         for i, frame in enumerate(data['frames']):
             vmaf_data[i] = vmaf_data[i] - frame['metrics']['vmaf']
             psnr_data[i] = psnr_data[i] - frame['metrics']['psnr']
-            ssim_data[i] = ssim_data[i] - frame['metrics']['ssim']
+            if 'ssim' in frame['metrics']:
+                ssim_data[i] = ssim_data[i] - frame['metrics']['ssim']
+            else:
+                ssim_data[i] = ssim_data[i] - frame['metrics']['ms_ssim']
 
 # render charts in order of expected decreasing size
 vmaf_array = numpy.array(vmaf_data)
