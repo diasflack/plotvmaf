@@ -25,7 +25,7 @@ matplot.close()  # destroy test figure
 
 # parse command line arguments
 parser = argparse.ArgumentParser(
-    description="Graph bitrate for vmaf/psnr/ssim")
+    description="Graph bitrate for vmaf/psnr/ssim/ms_ssim")
 parser.add_argument('input', help="input file/stream", metavar="INPUT")
 
 parser.add_argument('-c', '--compare', help="compare with")
@@ -43,6 +43,7 @@ if args.format and not args.output:
 vmaf_data = []
 psnr_data = []
 ssim_data = []
+ms_ssim_data = []
 frame_count = 0
 compareMode = False
 
@@ -51,10 +52,8 @@ with open(args.input) as json_file:
     for frame in data['frames']:
         vmaf_data.append(frame['metrics']['vmaf'])
         psnr_data.append(frame['metrics']['psnr'])
-        if 'ssim' in frame['metrics']:
-            ssim_data.append(frame['metrics']['ssim'])
-        else:
-            ssim_data.append(frame['metrics']['ms_ssim'])    
+        ssim_data.append(frame['metrics']['ssim'])
+        ms_ssim_data.append(frame['metrics']['ms_ssim'])
 
 if args.compare:
     compareMode = True
@@ -63,15 +62,14 @@ if args.compare:
         for i, frame in enumerate(data['frames']):
             vmaf_data[i] = vmaf_data[i] - frame['metrics']['vmaf']
             psnr_data[i] = psnr_data[i] - frame['metrics']['psnr']
-            if 'ssim' in frame['metrics']:
-                ssim_data[i] = ssim_data[i] - frame['metrics']['ssim']
-            else:
-                ssim_data[i] = ssim_data[i] - frame['metrics']['ms_ssim']
+            ssim_data[i] = ssim_data[i] - frame['metrics']['ssim']
+            ms_ssim_data[i] = ms_ssim_data[i] - frame['metrics']['ms_ssim']
 
 # render charts in order of expected decreasing size
 vmaf_array = numpy.array(vmaf_data)
 psnr_array = numpy.array(psnr_data)
 ssim_array = numpy.array(ssim_data)
+ms_ssim_array = numpy.array(ms_ssim_data)
 
 frame_count = len(data['frames'])
 
@@ -80,11 +78,12 @@ x = numpy.linspace(0, frame_count, frame_count, dtype = int)
 vmaf_y = vmaf_array
 psnr_y = psnr_array
 ssim_y = ssim_array
+ms_ssim_y = ms_ssim_array
 
-fig, (vmaf_ax, psnr_ax, ssim_ax) = matplot.subplots(3, 1)
+fig, (vmaf_ax, psnr_ax, ssim_ax, ms_ssim_ax) = matplot.subplots(4, 1)
 fig.canvas.set_window_title(args.input)
 
-fig_size_x_inches = 40
+fig_size_x_inches = 30
 fig_size_y_inches = 20
 fig_dpi = 100
 
@@ -93,6 +92,7 @@ fig.set_size_inches(fig_size_x_inches, fig_size_y_inches)
 vmaf_ax.set_title("VMAF")
 psnr_ax.set_title("PSNR")
 ssim_ax.set_title("SSIM")
+ms_ssim_ax.set_title("MS_SSIM")
 
 #x_tick step calculation
 pixels_all = fig_size_x_inches * fig_dpi
@@ -104,19 +104,23 @@ x_tick = numpy.linspace(0, frame_count, frame_number, dtype = int)
 vmaf_ax.set_xticks(x_tick)
 psnr_ax.set_xticks(x_tick)
 ssim_ax.set_xticks(x_tick)
+ms_ssim_ax.set_xticks(x_tick)
 
 if not compareMode:
     vmaf_ax.set_ylim(ymin=60, ymax=100)
     psnr_ax.set_ylim(ymin=35, ymax=60)
     ssim_ax.set_ylim(ymin=0.9, ymax=1)
+    ms_ssim_ax.set_ylim(ymin=0.9, ymax=1)
 
 vmaf_ax.grid(True)
 psnr_ax.grid(True)
 ssim_ax.grid(True)
+ms_ssim_ax.grid(True)
 
 vmaf_ax.plot(x, vmaf_y)
 psnr_ax.plot(x, psnr_y)
 ssim_ax.plot(x, ssim_y)
+ms_ssim_ax.plot(x, ms_ssim_y)
 
 # calculate min vmaf line position 
 vmaf_text_x = vmaf_ax.get_xlim()[1] * 0.15
@@ -151,9 +155,21 @@ ssim_ax.axhline(ssim_array.min(), linewidth=2, color='black')
 ssim_ax.text(ssim_text_x, ssim_text_y, ssim_text,
     horizontalalignment='center', fontweight='bold', color='black')
 
-fig.text(0.1, 0.93, vmaf_text, fontweight='bold', color='black')
-fig.text(0.1, 0.91, psnr_text, fontweight='bold', color='black')
-fig.text(0.1, 0.89, ssim_text, fontweight='bold', color='black')       
+# calculate min ssim line position 
+ms_ssim_text_x = ms_ssim_ax.get_xlim()[1] * 0.15
+ms_ssim_text_y = ms_ssim_array.min() + \
+    ((ms_ssim_ax.get_ylim()[1] - ms_ssim_ax.get_ylim()[0]) * 0.015)
+ms_ssim_text = "ms_ssim min ({:})".format(ms_ssim_array.min())
+
+# draw peak as think black line w/ text
+ms_ssim_ax.axhline(ms_ssim_array.min(), linewidth=2, color='black')
+ms_ssim_ax.text(ms_ssim_text_x, ms_ssim_text_y, ms_ssim_text,
+    horizontalalignment='center', fontweight='bold', color='black')    
+
+fig.text(0.1, 0.95, vmaf_text, fontweight='bold', color='black')
+fig.text(0.1, 0.93, psnr_text, fontweight='bold', color='black')
+fig.text(0.1, 0.91, ssim_text, fontweight='bold', color='black')       
+fig.text(0.1, 0.89, ms_ssim_text, fontweight='bold', color='black')       
 
 # render graph to file (if requested) or screen
 if args.output:
