@@ -51,9 +51,9 @@ with open(args.input) as json_file:
     data = json.load(json_file)
     for frame in data['frames']:
         vmaf_data.append(frame['metrics']['vmaf'])
-        psnr_data.append(frame['metrics']['psnr'])
-        ssim_data.append(frame['metrics']['ssim'])
-        ms_ssim_data.append(frame['metrics']['ms_ssim'])
+        psnr_data.append(frame['metrics']['psnr_y'])
+        ssim_data.append(frame['metrics']['float_ssim'])
+        ms_ssim_data.append(frame['metrics']['float_ms_ssim'])
 
 if args.compare:
     compareMode = True
@@ -61,9 +61,9 @@ if args.compare:
         data = json.load(json_file)
         for i, frame in enumerate(data['frames']):
             vmaf_data[i] = vmaf_data[i] - frame['metrics']['vmaf']
-            psnr_data[i] = psnr_data[i] - frame['metrics']['psnr']
-            ssim_data[i] = ssim_data[i] - frame['metrics']['ssim']
-            ms_ssim_data[i] = ms_ssim_data[i] - frame['metrics']['ms_ssim']
+            psnr_data[i] = psnr_data[i] - frame['metrics']['psnr_y']
+            ssim_data[i] = ssim_data[i] - frame['metrics']['float_ssim']
+            ms_ssim_data[i] = ms_ssim_data[i] - frame['metrics']['float_ms_ssim']
 
 # render charts in order of expected decreasing size
 vmaf_array = numpy.array(vmaf_data)
@@ -81,7 +81,7 @@ ssim_y = ssim_array
 ms_ssim_y = ms_ssim_array
 
 fig, (vmaf_ax, psnr_ax, ssim_ax, ms_ssim_ax) = matplot.subplots(4, 1)
-fig.canvas.set_window_title(args.input)
+fig.canvas.manager.set_window_title(args.input)
 
 fig_size_x_inches = 30
 fig_size_y_inches = 20
@@ -98,7 +98,7 @@ ms_ssim_ax.set_title("MS_SSIM")
 pixels_all = fig_size_x_inches * fig_dpi
 pixel_step = 100
 
-frame_number = pixels_all / pixel_step
+frame_number = int(pixels_all / pixel_step)
 x_tick = numpy.linspace(0, frame_count, frame_number, dtype = int)
 
 vmaf_ax.set_xticks(x_tick)
